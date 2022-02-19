@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"pokemon/model"
 
@@ -71,6 +72,17 @@ func main() {
 	for _, hero := range poke {
 		log.Println(hero.Name, hero.Url)
 	}
+	body := url.Values{
+		"name":       {"John Doe"},
+		"occupation": {"gardener"},
+	}
+	use, err := http.PostForm("/users", body)
+	if err != nil {
+		log.Fatal(err)
+	}
+	var res map[string]interface{}
+	json.NewDecoder(use.Body).Decode(&res)
+	fmt.Println(res["form"])
 }
 
 func GetAllPokemon(client *mongo.Client, filter bson.M) []*model.Result {
@@ -91,7 +103,7 @@ func GetAllPokemon(client *mongo.Client, filter bson.M) []*model.Result {
 	return pokemons
 }
 
-func InsertNewHero(client *mongo.Client, user model.Users) interface{} {
+func InsertNewUser(client *mongo.Client, user model.Users) interface{} {
 	var users model.Users
 	collection := client.Database("pokemon").Collection("users")
 	Input, err := collection.InsertOne(ctx, users)
